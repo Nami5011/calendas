@@ -4,16 +4,22 @@ import './index.css';
 // import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Calender from './pages/Calender';
 import Confirm from './pages/Confirm';
 import NotFoundPage from './pages/NotFoundPage';
+import App from './App';
 
 const router = createBrowserRouter([
 	{
 		path: '/',
-		element: <Calender />,
+		element: <App />,
 		errorElement: <NotFoundPage />,
+	},
+	{
+		path: '/calender/:userCode',
+		element: <Calender />,
 	},
 	{
 		path: '/confirm',
