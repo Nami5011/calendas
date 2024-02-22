@@ -1,10 +1,52 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../App.css';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+// import getCalenderList from '../models/calender';
 
+// type Post = {
+// 	message: string
+// }
+type Params = {
+	userCode: string
+}
+// type OauthUrl = {
+// 	url: string
+// }
 function Calender() {
-	const params = useParams<{ userCode: string }>();
-	console.log(params)
+	const params = useParams<Params>();
+	const { search } = useLocation();
+	const queryString = new URLSearchParams(search);
+	const code = queryString.get('code') as string | null;
+	console.log('params', code)
+	useEffect(() => {
+		const controller = new AbortController();
+		// const fetchGet = async () => {
+		// 	try {
+		// 		const response = await fetch('https://calendas-laravel-api.fly.dev/api/v1/googleOauth', {
+		// 			signal: controller.signal,
+		// 		});
+		// 		console.log(response);
+
+		// 		const oauthUrl = (await response.json()) as OauthUrl;
+		// 		window.location.href = oauthUrl.url;
+		// 	} catch (e: any) {
+		// 		console.error(e);
+		// 	}
+		// }
+		// fetchGet();
+		// const fetchPost = async () => {
+		// 	try {
+		// 		const response = await getCalenderList();
+		// 		console.log(response);
+		// 	} catch (e: any) {
+		// 		console.error(e);
+		// 	}
+
+		// }
+		// fetchPost();
+		return () => controller.abort();
+	}, []);
+
 	return (
 		<div className="App">
 			<header className="App-header">

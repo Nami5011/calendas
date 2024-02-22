@@ -1,0 +1,26 @@
+# fly.toml app configuration file generated for calendas on 2024-02-18T01:00:07+09:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'calendas'
+primary_region = 'hkg'
+
+[build]
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+  REACT_APP_GOOGLE_CLIENT_ID = '420257224319-o9l19ni5k5au5bbg2ibfubjbj8e2qb3g.apps.googleusercontent.com'
+  REACT_APP_API_URI = 'https://calendas-laravel-api.fly.dev'
