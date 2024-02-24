@@ -80,7 +80,7 @@ function Login() {
 			set_signedUser(decodedUser);
 			// base64 encode
 			var encodedEmail = encodeURIComponent(window.btoa(decodedUser?.email || ''));
-			const response = await fetch(process.env.REACT_APP_API_URI + '/api/v1/user?id=' + encodedEmail);
+			const response = await fetch(process.env.REACT_APP_API_URI + '/api/v1/user?key=' + encodedEmail);
 			const userProfile = (await response.json()) as User;
 			console.log('userProfile', userProfile);
 			if (!userProfile.user_id) {
