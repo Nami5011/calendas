@@ -11,7 +11,7 @@ function App() {
 				<p>
 					Edit <code>src/App.tsx</code> and save to reload.
 				</p>
-				<Link to="/calender/userCode">go to calender </Link>
+				<Link to="/calendar/userCode">go to calendar </Link>
 				<a
 					className="App-link"
 					href="https://reactjs.org"

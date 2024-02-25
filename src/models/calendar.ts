@@ -1,5 +1,5 @@
 
-export default async function getCalenderList() {
+export default async function getCalendarList() {
 	try {
 		const response = await fetch('https://calendas-api.fly.dev/post-hello',
 			{

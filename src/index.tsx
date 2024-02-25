@@ -4,9 +4,9 @@ import './index.css';
 // import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
-import Calender from './pages/Calender';
+import Calendar from './pages/Calendar';
 import Confirm from './pages/Confirm';
 import NotFoundPage from './pages/NotFoundPage';
 import App from './App';
@@ -28,8 +28,8 @@ const router = createBrowserRouter([
 		element: <Mypage />,
 	},
 	{
-		path: '/calender/:userCode',
-		element: <Calender />,
+		path: '/calendar/:userCode',
+		element: <><Calendar /></>,
 	},
 	{
 		path: '/confirm',
