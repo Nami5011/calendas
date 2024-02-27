@@ -91,18 +91,16 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 												onClick={() => handleSelectDay(day)}
 												className={classNames(
 													(parentProps.selectedDay && isEqual(day, parentProps.selectedDay)) && 'bg-indigo-700',
+													isToday(day) && "text-[#FF8911]",
+													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && isSameMonth(day, firstDayCurrentMonth)) && "text-gray-500 dark:text-gray-100 hover:text-gray-100",
+													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && !isSameMonth(day, firstDayCurrentMonth)) && "text-gray-300 dark:text-gray-500",
+													(!isToday(day) && isEqual(day, parentProps.selectedDay || startOfToday())) && "text-white",
+													(dayIndex !== 0 && dayIndex !== 6) && "font-medium",
 													false && "ring-1 ring-indigo-700",
 													"p-1.5 m-0.5 mx-auto cursor-pointer flex justify-center items-center hover:bg-indigo-500 rounded-full"
 												)}
 											>
-												<div className={classNames(
-													isToday(day) && "text-[#FF8911]",
-													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && isSameMonth(day, firstDayCurrentMonth)) && "text-gray-500 dark:text-gray-100",
-													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && !isSameMonth(day, firstDayCurrentMonth)) && "text-gray-300 dark:text-gray-500",
-													(!isToday(day) && isEqual(day, parentProps.selectedDay || startOfToday())) && "text-white",
-													(dayIndex !== 0 && dayIndex !== 6) && "font-medium",
-													"text-base w-[24px] h-[24px] text-center"
-												)}>
+												<div className="text-base w-[24px] h-[24px] text-center">
 													<time dateTime={format(day, 'yyyy-MM-dd')}>
 														{format(day, 'd')}
 													</time>

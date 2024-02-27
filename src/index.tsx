@@ -12,6 +12,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import App from './App';
 import Login from './pages/Login';
 import Mypage from './pages/Mypage';
+import HeaderGuest from './components/HeaderGuest';
 
 const router = createBrowserRouter([
 	{
@@ -29,7 +30,7 @@ const router = createBrowserRouter([
 	},
 	{
 		path: '/calendar/:userCode',
-		element: <><Calendar /></>,
+		element: <><HeaderGuest /><Calendar /></>,
 	},
 	{
 		path: '/confirm',
