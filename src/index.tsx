@@ -29,12 +29,13 @@ const router = createBrowserRouter([
 		element: <Mypage />,
 	},
 	{
-		path: '/calendar/:userCode',
+		path: '/calendar',
+		// path: '/calendar/:userCode',
 		element: <><HeaderGuest /><Calendar /></>,
 	},
 	{
 		path: '/confirm',
-		element: <Confirm />,
+		element: <><HeaderGuest /><Confirm /></>,
 	},
 ]);
 

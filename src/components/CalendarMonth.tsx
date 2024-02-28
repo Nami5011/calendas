@@ -1,15 +1,8 @@
 import { add, eachDayOfInterval, endOfMonth, endOfWeek, format, isEqual, isSameMonth, isToday, parse, startOfMonth, startOfToday, startOfWeek } from "date-fns";
 import { useState } from "react";
 import CalendarWeekHeader from "./CalendarWeekHeader";
-// import { useState } from "react";
-// import PropTypes from 'prop-types';
+import { classNames } from "../utils/cssClassName";
 
-// CalendarMonth.propTypes = {
-// 	parentProps: PropTypes.shape({
-// 		selectedDay: PropTypes.instanceOf(Date),
-// 		set_selectedDay: PropTypes.func.isRequired,
-// 	}).isRequired,
-// }
 CalendarMonth.defaultProps = {
 	parentProps: {
 		selectedDay: null,
@@ -55,12 +48,9 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 		parentProps.set_selectedDay(day);
 	}
 
-	function classNames(...classes: any) {
-		return classes.filter(Boolean).join(' ');
-	}
 	return (
 		<>
-			<div className="w-full md:w-auto md:p-8 p-4 dark:bg-gray-800 bg-white md:rounded-l md:rounded-r-none">
+			<div className="w-full md:w-auto md:p-8 p-4 dark:bg-gray-600 md:dark:bg-gray-800 bg-white md:rounded-l md:rounded-r-none">
 				<div className="px-4 flex items-center justify-between">
 					<span tabIndex={0} className="focus:outline-none  text-base font-bold dark:text-gray-100 text-gray-800">{format(firstDayCurrentMonth, 'MMM yyyy')}</span>
 					<div className="flex items-center">
@@ -79,7 +69,7 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 
 					</div>
 				</div>
-				<div className="flex items-center justify-between pt-12 overflow-x-auto">
+				<div className="flex items-center justify-between pt-6 md:pt-12 overflow-x-auto">
 					<table className="w-full">
 						<CalendarWeekHeader />
 						<tbody>
@@ -90,14 +80,14 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 											<button
 												onClick={() => handleSelectDay(day)}
 												className={classNames(
-													(parentProps.selectedDay && isEqual(day, parentProps.selectedDay)) && 'bg-indigo-700',
+													(parentProps.selectedDay && isEqual(day, parentProps.selectedDay)) && 'bg-[#7F27FF]',
 													isToday(day) && "text-[#FF8911]",
 													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && isSameMonth(day, firstDayCurrentMonth)) && "text-gray-500 dark:text-gray-100 hover:text-gray-100",
 													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && !isSameMonth(day, firstDayCurrentMonth)) && "text-gray-300 dark:text-gray-500",
 													(!isToday(day) && isEqual(day, parentProps.selectedDay || startOfToday())) && "text-white",
 													(dayIndex !== 0 && dayIndex !== 6) && "font-medium",
-													false && "ring-1 ring-indigo-700",
-													"p-1.5 m-0.5 mx-auto cursor-pointer flex justify-center items-center hover:bg-indigo-500 rounded-full"
+													false && "ring-1 ring-[#7F27FF]",
+													"p-1.5 m-0.5 mx-auto cursor-pointer flex justify-center items-center hover:bg-[#9F70FD] rounded-full"
 												)}
 											>
 												<div className="text-base w-[24px] h-[24px] text-center">
