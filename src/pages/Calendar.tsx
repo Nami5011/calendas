@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // import getCalenderList from '../models/calender';
 // import { startOfToday } from 'date-fns';
 import CalendarMonth from '../components/CalendarMonth';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import EventCard from '../components/EventCard';
 import { setSession } from '../utils/session';
 import { classNames } from '../utils/cssClassName';
@@ -22,9 +22,10 @@ function Calendar() {
 	const { search } = useLocation();
 	const queryString = new URLSearchParams(search);
 	const code = queryString.get('code') as string | null;
+	const date = queryString.get('date')?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? queryString.get('date') : null;
 	// calendar
 	// const today = startOfToday();
-	const [selectedDay, set_selectedDay] = useState<Date | null>(null);
+	const [selectedDay, set_selectedDay] = useState<Date | null>(date ? parse(date, 'yyyy-MM-dd', new Date()) : null);
 	const [availableTimeList, set_availableTimeList] = useState<Array<TimeRange> | null>(null);
 	const availableList = {
 		'2024-02-29': [
@@ -54,13 +55,14 @@ function Calendar() {
 		duration: '30 minutes',
 	}
 	useEffect(() => {
-		if (!selectedDay || !availableList) {
+		if (!selectedDay) {
 			set_availableTimeList(null);
 			return;
 		}
 		let key = format(selectedDay, 'yyyy-MM-dd') as keyof AvailableList;
 		set_availableTimeList(availableList[key] || null);
 		console.log(availableList[key])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedDay]);
 
 	const handleSelectTime = (time: TimeRange) => {

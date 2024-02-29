@@ -51,7 +51,7 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 	return (
 		<>
 			<div className="w-full md:w-auto md:p-8 p-4 dark:bg-gray-600 md:dark:bg-gray-800 bg-white md:rounded-l md:rounded-r-none">
-				<div className="px-4 flex items-center justify-between">
+				<div className="border-b pb-3 px-4 flex items-center justify-between">
 					<span tabIndex={0} className="focus:outline-none  text-base font-bold dark:text-gray-100 text-gray-800">{format(firstDayCurrentMonth, 'MMM yyyy')}</span>
 					<div className="flex items-center">
 						<button onClick={() => changeMonth(-1)} aria-label="calendar backward" className="focus:text-gray-400 hover:text-gray-400 text-gray-800 dark:text-gray-100">
@@ -69,7 +69,7 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 
 					</div>
 				</div>
-				<div className="flex items-center justify-between pt-6 md:pt-12 overflow-x-auto">
+				<div className="flex items-center justify-between pt-3 overflow-x-auto">
 					<table className="w-full">
 						<CalendarWeekHeader />
 						<tbody>
