@@ -13,6 +13,7 @@ import App from './App';
 import Login from './pages/Login';
 import Mypage from './pages/Mypage';
 import HeaderGuest from './components/HeaderGuest';
+import BookingComplete from './pages/BookingComplete';
 
 const router = createBrowserRouter([
 	{
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
 	{
 		path: '/confirm',
 		element: <><HeaderGuest /><Confirm /></>,
+	},
+	{
+		path: '/complete',
+		element: <><HeaderGuest /><BookingComplete /></>,
 	},
 ]);
 

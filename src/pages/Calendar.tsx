@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import CalendarMonth from '../components/CalendarMonth';
 import { format, parse } from 'date-fns';
 import EventCard from '../components/EventCard';
-import { setSession } from '../utils/session';
+import { removeSession, setSession } from '../utils/session';
 import { classNames } from '../utils/cssClassName';
 
 type TimeRange = {
@@ -50,10 +50,19 @@ function Calendar() {
 		]
 	} as AvailableList;
 	const event = {
+		code: '123',
 		title: 'Title',
 		description: 'description here',
 		duration: '30 minutes',
+		confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
 	}
+
+	// Init
+	useEffect(() => {
+		removeSession('event');
+	}, []);
+
+	// selectedDay change evebt
 	useEffect(() => {
 		if (!selectedDay) {
 			set_availableTimeList(null);
@@ -65,6 +74,7 @@ function Calendar() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedDay]);
 
+	// navigate Confirm page
 	const handleSelectTime = (time: TimeRange) => {
 		let date = format(selectedDay || new Date(), 'yyyy-MM-dd');
 		setSession('event', event);

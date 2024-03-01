@@ -2,21 +2,26 @@
 module.exports = {
   content: ['./src/**/*.{html,js,jsx,ts,tsx}', './public/index.html'],
   theme: {
-    extend: {},
+	extend: {},
   },
   plugins: [
-    function ({ addUtilities }) {
+	function ({ addUtilities }) {
 		const newUtilities = {
-		  '@media (prefers-color-scheme: dark)': {
+			'@media (prefers-color-scheme: dark)': {
+				'.svg-white': {
+				filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(176deg) brightness(109%) contrast(94%)',
+				},
+				'.svg-black': {
+					filter: 'brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(175deg)',
+				},
+			},
 			'.svg-white': {
-			  filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(176deg) brightness(109%) contrast(94%)',
+				filter: 'brightness(0) saturate(100%) invert(100%) sepia(0%) saturate(7499%) hue-rotate(176deg) brightness(109%) contrast(94%)',
 			},
-			'.svg-black': {
-				filter: 'brightness(0) invert(1) sepia(1) saturate(8) hue-rotate(175deg)',
+			'.svg-orange': {
+				filter: 'invert(52%) sepia(82%) saturate(742%) hue-rotate(350deg) brightness(100%) contrast(102%)',
 			},
-		  },
 		};
-  
 		addUtilities(newUtilities);
 	  },
   ],
