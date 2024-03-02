@@ -2,15 +2,17 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import '../App.css';
 import { getSession, setSession } from '../utils/session';
 import EventCard from '../components/EventCard';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { parse } from 'date-fns';
-import { isValidEmail, isValidRequiredInput } from '../utils/validations';
 import DateTimeCard from '../components/DateTimeCard';
+import Input from '../components/Input';
+import { FormProvider, useForm } from 'react-hook-form';
 type FormInput = {
 	name?: string | null;
 	email?: string | null;
 }
 function Confirm() {
+	const methods = useForm();
 	const navigate = useNavigate();
 	const { search } = useLocation();
 	const queryString = new URLSearchParams(search);
@@ -19,11 +21,7 @@ function Confirm() {
 	const parseDate = date ? parse(date, 'yyyy-MM-dd', new Date()) : null;
 	const start = queryString.get('start') as string | null;
 	const end = queryString.get('end') as string | null;
-	var editAddress = `/calendar?code=${code}`;
-	if (date) editAddress += `&date=${date}`;
-	const formInput = getSession('formInput') ? getSession('formInput') : null as FormInput | null;
-	const [email, set_email] = useState(formInput?.email ? formInput.email : '');
-	const [name, set_name] = useState(formInput?.name ? formInput.name : '');
+
 	const [event, set_event] = useState(getSession('event') ? getSession('event') : null);
 	if (!event) {
 		set_event({
@@ -34,15 +32,26 @@ function Confirm() {
 			confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
 		});
 	}
+
+	useEffect(() => {
+		let formInput = getSession('formInput') ? getSession('formInput') : null as FormInput | null;
+		methods.setValue('name', formInput?.name ? formInput.name : '');
+		methods.setValue('email', formInput?.email ? formInput.email : '');
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
 	const goBack = () => {
+		let editAddress = `/calendar?code=${code}`;
+		if (date) editAddress += `&date=${date}`;
+
 		setSession('formInput', {
-			email: email,
-			name: name,
+			email: methods.getValues('email'),
+			name: methods.getValues('name'),
 		} as FormInput);
 		navigate(editAddress);
 	}
 
-	const submitForm = () => {
+	const onSubmit = methods.handleSubmit(data => {
 		let state = {
 			code: code,
 			title: event.title,
@@ -50,11 +59,11 @@ function Confirm() {
 			start: start,
 			end: end,
 			confirmation_message: event.confirmation_message,
-			name: name,
-			email: email,
+			name: data.name,
+			email: data.email,
 		};
 		navigate('/complete', { state });
-	}
+	});
 
 	return (
 		<div className="grid grid-cols-12 lg:grid-cols-8 gap-4">
@@ -75,29 +84,38 @@ function Confirm() {
 						<span className="col-span-10 focus:outline-none text-base font-medium text-center
 						 text-gray-800 dark:text-gray-100">Confim Booking</span>
 					</div>
-					<div className="pt-3">
-						<DateTimeCard parentProps={{ edit: true, goBack: goBack, parseDate: parseDate, start: start, end: end }} />
-						{/* Name */}
-						<label className="mx-2">Name <span className="text-red-700">*</span></label>
-						<input type="text" className="my-2 p-3 w-full border border-gray-500 text-black font-medium rounded-lg"
-							value={name} onChange={e => set_name(e.target.value)} />
-						{!isValidRequiredInput(name) && <div className="error text-red-700 dark:text-red-400">Name is required</div>}
-						{/* Email */}
-						<label className="mx-2">Email <span className="text-red-700">*</span></label>
-						<input type="email" className="my-2 p-3 w-full border border-gray-500 text-black font-medium rounded-lg"
-							value={email} onChange={e => set_email(e.target.value)} />
-						{(email !== '' && !isValidEmail(email)) && <div className="error text-red-700 dark:text-red-400">Invalid email address</div>}
-						{!isValidRequiredInput(email) && <div className="error text-red-700 dark:text-red-400">Email is required</div>}
-
-						<div className="mt-4 flex flex-col md:flex-row-reverse md:justify-between font-medium">
-							<button type="button" className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center
+					<FormProvider {...methods}>
+						<form className="pt-3"
+							onSubmit={e => e.preventDefault()}
+							noValidate
+						>
+							<DateTimeCard parentProps={{ edit: true, goBack: goBack, parseDate: parseDate, start: start, end: end }} />
+							<Input label="Name" name="name" type="text" id="name" maxLength={30}
+								validation={{
+									required: {
+										value: true,
+										message: 'required',
+									},
+								}}
+							/>
+							<Input label="Email" name="email" type="email" id="email" maxLength={254}
+								validation={{
+									required: {
+										value: true,
+										message: 'required',
+									},
+								}}
+							/>
+							<div className="mt-4 flex flex-col md:flex-row-reverse md:justify-between font-medium">
+								<button className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center
 							text-white bg-[#7F27FF] hover:bg-[#9F70FD] rounded-lg"
-								onClick={() => submitForm()}>Confirm Booking</button>
-							<button type="button" className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center 
+									onClick={() => onSubmit()}>Confirm Booking</button>
+								<button type="button" className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center 
 								border border-[#9F70FD] hover:bg-[#9F70FD] hover:text-white rounded-lg"
-								onClick={() => goBack()}>Cancel</button>
-						</div>
-					</div>
+									onClick={() => goBack()}>Cancel</button>
+							</div>
+						</form>
+					</FormProvider>
 				</div>
 			</div>
 		</div>
