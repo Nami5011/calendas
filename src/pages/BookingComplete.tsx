@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import DateTimeCard from "../components/DateTimeCard";
-import { getSession, removeSession } from "../utils/session";
+import { removeSession } from "../utils/session";
 import { useLocation, useNavigate } from "react-router-dom";
 import { parse } from "date-fns";
 import check from "../images/check.svg";

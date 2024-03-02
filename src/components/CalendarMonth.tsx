@@ -1,4 +1,4 @@
-import { add, eachDayOfInterval, endOfMonth, endOfWeek, format, isEqual, isSameMonth, isToday, parse, startOfMonth, startOfToday, startOfWeek } from "date-fns";
+import { add, eachDayOfInterval, endOfMonth, endOfWeek, format, isAfter, isBefore, isEqual, isSameMonth, isToday, parse, startOfMonth, startOfToday, startOfWeek } from "date-fns";
 import { useState } from "react";
 import CalendarWeekHeader from "./CalendarWeekHeader";
 import { classNames } from "../utils/cssClassName";
@@ -7,19 +7,20 @@ CalendarMonth.defaultProps = {
 	parentProps: {
 		selectedDay: null,
 		set_selectedDay: () => { },
+		selectableStartDay: startOfToday(),
 	},
 }
 type CalendarMonthProps = {
 	parentProps: {
 		selectedDay: Date | null;
 		set_selectedDay: React.Dispatch<React.SetStateAction<Date | null>>;
+		selectableStartDay: Date;
 	}
 }
 function CalendarMonth({ parentProps }: CalendarMonthProps) {
-	// const today = startOfToday();
-	const [currentMonth, set_currentMonth] = useState(format(parentProps.selectedDay || startOfToday(), 'MMM-yyyy'));
+	const today = startOfToday();
+	const [currentMonth, set_currentMonth] = useState(format(parentProps.selectedDay || today, 'MMM-yyyy'));
 	let firstDayCurrentMonth = parse(currentMonth, 'MMM-yyyy', new Date());
-
 	// List of days
 	let newDays = eachDayOfInterval({
 		start: startOfWeek(firstDayCurrentMonth),
@@ -42,6 +43,7 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 	}
 
 	const handleSelectDay = (day: Date) => {
+		if (isBefore(day, parentProps.selectableStartDay)) return;
 		if (!isSameMonth(day, firstDayCurrentMonth)) {
 			set_currentMonth(format(startOfMonth(day), 'MMM-yyyy'));
 		}
@@ -80,14 +82,14 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 											<button
 												onClick={() => handleSelectDay(day)}
 												className={classNames(
-													(parentProps.selectedDay && isEqual(day, parentProps.selectedDay)) && 'bg-[#7F27FF]',
-													isToday(day) && "text-[#FF8911]",
-													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && isSameMonth(day, firstDayCurrentMonth)) && "text-gray-500 dark:text-gray-100 hover:text-gray-100",
-													(!isToday(day) && !isEqual(day, parentProps.selectedDay || startOfToday()) && !isSameMonth(day, firstDayCurrentMonth)) && "text-gray-300 dark:text-gray-500",
-													(!isToday(day) && isEqual(day, parentProps.selectedDay || startOfToday())) && "text-white",
-													(dayIndex !== 0 && dayIndex !== 6) && "font-medium",
+													isToday(day) && "underline underline-offset-4 decoration-[#FF8911]", // Underbar for today
+													(parentProps.selectedDay && isEqual(day, parentProps.selectedDay)) && 'bg-[#7F27FF] text-white', // Selected day
+													(isSameMonth(day, firstDayCurrentMonth) && !isBefore(day, parentProps.selectableStartDay)) && "text-gray-500 dark:text-gray-100", // Selectable day in the month
+													(!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, parentProps.selectableStartDay)) && "text-gray-300 dark:text-gray-500", // Other month or Before available day
+													!isBefore(day, parentProps.selectableStartDay) && "hover:bg-[#9F70FD] hover:text-gray-100", // Selectable day
+													(dayIndex !== 0 && dayIndex !== 6) && "font-medium", // Weekend
 													false && "ring-1 ring-[#7F27FF]",
-													"p-1.5 m-0.5 mx-auto cursor-pointer flex justify-center items-center hover:bg-[#9F70FD] rounded-full"
+													"p-1.5 m-0.5 mx-auto cursor-pointer flex justify-center items-center rounded-full"
 												)}
 											>
 												<div className="text-base w-[24px] h-[24px] text-center">

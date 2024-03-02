@@ -30,6 +30,7 @@ function Confirm() {
 			description: 'description here',
 			duration: '30 minutes',
 			confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
+			start_day_length: 2,
 		});
 	}
 

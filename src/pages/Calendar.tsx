@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // import getCalenderList from '../models/calender';
 // import { startOfToday } from 'date-fns';
 import CalendarMonth from '../components/CalendarMonth';
-import { format, parse } from 'date-fns';
+import { addDays, format, parse, startOfToday } from 'date-fns';
 import EventCard from '../components/EventCard';
 import { removeSession, setSession } from '../utils/session';
 import { classNames } from '../utils/cssClassName';
@@ -18,6 +18,7 @@ type AvailableList = {
 };
 
 function Calendar() {
+	const today = startOfToday();
 	const navigate = useNavigate();
 	const { search } = useLocation();
 	const queryString = new URLSearchParams(search);
@@ -55,6 +56,7 @@ function Calendar() {
 		description: 'description here',
 		duration: '30 minutes',
 		confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
+		start_day_length: 2,
 	}
 
 	// Init
@@ -89,7 +91,13 @@ function Calendar() {
 			</div>
 			<div className="col-span-12 md:col-start-2 md:col-span-10 lg:col-start-3 lg:col-span-4">
 				<div className="w-auto flex flex-wrap md:flex-nowrap items-stretch justify-center">
-					<CalendarMonth parentProps={{ selectedDay: selectedDay, set_selectedDay: set_selectedDay }} />
+					<CalendarMonth
+						parentProps={{
+							selectedDay: selectedDay,
+							set_selectedDay: set_selectedDay,
+							selectableStartDay: addDays(today, event.start_day_length || 0),
+						}}
+					/>
 					<div className="w-full lg:min-w-80 py-3 px-4 md:p-8 lg:px-12 dark:bg-gray-700 bg-gray-50 md:rounded-r md:rounded-l-none">
 						<div className="px-2">
 							{selectedDay &&
@@ -115,15 +123,6 @@ function Calendar() {
 									<p className="text-center">Try another day</p>
 								}
 							</div>
-							{/* <div className="border-b pb-4 border-gray-400 border-dashed pt-5">
-								<p className="text-xs font-light leading-3 text-gray-500 dark:text-gray-50">10:00 AM</p>
-								<a href="https://tailwindcomponents.com" tabIndex={0} className="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2">Orientation session with new hires</a>
-							</div>
-							<div className="border-b pb-4 border-gray-400 border-dashed pt-5">
-								<p className="text-xs font-light leading-3 text-gray-500 dark:text-gray-50">9:00 AM</p>
-								<a href="https://tailwindcomponents.com" tabIndex={0} className="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2">Zoom call with design team</a>
-								<p className="text-sm pt-2 leading-none text-gray-600 dark:text-gray-50">Discussion on UX sprint and Wireframe review</p>
-							</div> */}
 						</div>
 					</div>
 				</div>
