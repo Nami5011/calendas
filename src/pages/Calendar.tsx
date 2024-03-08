@@ -10,6 +10,8 @@ import { removeSession, setSession } from '../utils/session';
 import { classNames } from '../utils/cssClassName';
 import { useQuery } from '@tanstack/react-query';
 import { createEvent, getAvailableList } from '../models/calendar';
+import { type Event } from '../types/event';
+import { getEvent } from '../models/event';
 
 type TimeRange = {
 	start: string;
@@ -31,19 +33,28 @@ function Calendar() {
 	const date = queryString.get('date')?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? queryString.get('date') : null;
 	const [selectedDay, set_selectedDay] = useState<Date | null>(date ? parse(date, 'yyyy-MM-dd', new Date()) : null);
 	const [availableTimeList, set_availableTimeList] = useState<Array<TimeRange> | null>(null);
+	const [event, set_event] = useState<Event | null>(null);
 
-	const event = {
-		code: '123',
-		title: 'Meeting',
-		description: 'description here',
-		duration: '30 minutes',
-		confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
-		start_day_length: 2,
+	const handleGetEventQuery = async (signal: AbortSignal) => {
+		console.log('called get event')
+		let newEvent = await getEvent(signal, code) as Event | null;
+		set_event(newEvent || null);
+		return newEvent;
 	}
+	// get event query
+	const getEventQuery = useQuery({
+		queryKey: ['event' + code],
+		queryFn: ({ signal }) => handleGetEventQuery(signal),
+		staleTime: 1000 * 60 * 10, //fetch again after 10 minutes
+		enabled: false,
+	});
+
 
 	// Init
 	useEffect(() => {
 		removeSession('event');
+		getEventQuery.refetch();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// available days list query
@@ -85,7 +96,7 @@ function Calendar() {
 	// navigate Confirm page
 	const handleSelectTime = (time: TimeRange) => {
 		let date = format(selectedDay || new Date(), 'yyyy-MM-dd');
-		setSession('event', event);
+		setSession('event', event || {});
 		navigate(`/confirm?code=${code}&date=${date}&start=${time.start}&end=${time.end}`);
 	}
 
@@ -101,7 +112,7 @@ function Calendar() {
 						parentProps={{
 							selectedDay: selectedDay,
 							set_selectedDay: set_selectedDay,
-							selectableStartDay: addDays(today, event.start_day_length || 0),
+							selectableStartDay: addDays(today, event?.start_day_length || 0),
 						}}
 					/>
 					<div className="w-full lg:min-w-80 py-3 px-4 md:p-8 lg:px-12 dark:bg-gray-700 bg-gray-50 md:rounded-r md:rounded-l-none">

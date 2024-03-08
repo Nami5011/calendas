@@ -10,6 +10,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { type CreateGoogleEvent } from '../types/googleCalendar';
 import { createEvent } from '../models/calendar';
 import { useQuery } from '@tanstack/react-query';
+import { getEvent } from '../models/event';
+import { type Event } from '../types/event';
 type FormInput = {
 	name?: string | null;
 	email?: string | null;
@@ -19,28 +21,36 @@ function Confirm() {
 	const navigate = useNavigate();
 	const { search } = useLocation();
 	const queryString = new URLSearchParams(search);
-	const code = queryString.get('code') as string | null;
+	const code = queryString.get('code') as string | '';
 	const date = queryString.get('date')?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? queryString.get('date') : null;
 	const parseDate = date ? parse(date, 'yyyy-MM-dd', new Date()) : null;
 	const start = queryString.get('start') as string | null;
 	const end = queryString.get('end') as string | null;
 
-	const [event, set_event] = useState(getSession('event') ? getSession('event') : null);
-	if (!event) {
-		set_event({
-			code: '123',
-			title: 'Meeting',
-			description: 'description here',
-			duration: '30 minutes',
-			confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
-			start_day_length: 2,
-		});
+	const [event, set_event] = useState<Event | null>(getSession('event') ? getSession('event') : null);
+	const handleGetEventQuery = async (signal: AbortSignal) => {
+		console.log('called get event')
+		let newEvent = await getEvent(signal, code) as Event | null;
+		set_event(newEvent || null);
+		return newEvent;
 	}
+	// get event query
+	const getEventQuery = useQuery({
+		queryKey: ['event' + code],
+		queryFn: ({ signal }) => handleGetEventQuery(signal),
+		staleTime: 1000 * 60 * 10, //fetch again after 10 minutes
+		enabled: false,
+	});
 
 	useEffect(() => {
+		// set form value
 		let formInput = getSession('formInput') ? getSession('formInput') : null as FormInput | null;
 		methods.setValue('name', formInput?.name ? formInput.name : '');
 		methods.setValue('email', formInput?.email ? formInput.email : '');
+		// get event
+		if (!event) {
+			getEventQuery.refetch();
+		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
@@ -70,7 +80,7 @@ function Confirm() {
 		// Create Google Calendar Event
 		googleEvent.current = {
 			event_code: code,
-			summary: event.title,
+			summary: event?.title,
 			startDateTime: `${date} ${start}`,
 			endDateTime: `${date} ${end}`,
 			timeZone: 'Asia/Tokyo',
@@ -88,11 +98,11 @@ function Confirm() {
 		console.log('result', result);
 		let state = {
 			code: code,
-			title: event.title,
+			title: event?.title,
 			date: date,
 			start: start,
 			end: end,
-			confirmation_message: event.confirmation_message,
+			confirmation_message: event?.confirmation_message,
 			name: data.name,
 			email: data.email,
 		};
