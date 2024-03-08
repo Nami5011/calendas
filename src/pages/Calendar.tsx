@@ -4,55 +4,37 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // import getCalenderList from '../models/calender';
 // import { startOfToday } from 'date-fns';
 import CalendarMonth from '../components/CalendarMonth';
-import { addDays, format, parse, startOfToday } from 'date-fns';
+import { addDays, endOfMonth, format, parse, startOfMonth, startOfToday } from 'date-fns';
 import EventCard from '../components/EventCard';
 import { removeSession, setSession } from '../utils/session';
 import { classNames } from '../utils/cssClassName';
+import { useQuery } from '@tanstack/react-query';
+import { createEvent, getAvailableList } from '../models/calendar';
 
 type TimeRange = {
 	start: string;
 	end: string;
 }
+
 type AvailableList = {
-	[date: string]: TimeRange[];
-};
+	date: string; // Date in YYYY-MM-DD format
+	availableTimeList: TimeRange[];
+}[];
 
 function Calendar() {
 	const today = startOfToday();
 	const navigate = useNavigate();
 	const { search } = useLocation();
 	const queryString = new URLSearchParams(search);
-	const code = queryString.get('code') as string | null;
+	const code = queryString.get('code') as string | '';
+	// yyyy-MM-dd
 	const date = queryString.get('date')?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? queryString.get('date') : null;
-	// calendar
-	// const today = startOfToday();
 	const [selectedDay, set_selectedDay] = useState<Date | null>(date ? parse(date, 'yyyy-MM-dd', new Date()) : null);
 	const [availableTimeList, set_availableTimeList] = useState<Array<TimeRange> | null>(null);
-	const availableList = {
-		'2024-02-29': [
-			{
-				'start': '11:00',
-				'end': '11:30',
-			},
-			{
-				'start': '12:00',
-				'end': '12:30',
-			},
-		],
-		'2024-03-01': [
-			{
-				'start': '11:30',
-				'end': '12:00',
-			},
-			{
-				'start': '13:00',
-				'end': '13:30',
-			},
-		]
-	} as AvailableList;
+
 	const event = {
 		code: '123',
-		title: 'Title',
+		title: 'Meeting',
 		description: 'description here',
 		duration: '30 minutes',
 		confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
@@ -64,15 +46,39 @@ function Calendar() {
 		removeSession('event');
 	}, []);
 
-	// selectedDay change evebt
-	useEffect(() => {
-		if (!selectedDay) {
+	// available days list query
+	const availableListQuery = useQuery({
+		queryKey: ['availableList' + startOfMonth(selectedDay || today) + endOfMonth(selectedDay || today)],
+		queryFn: ({ signal }) => handleGetAvailableList(signal),
+		staleTime: 1000 * 60 * 10, //fetch again after 10 minutes
+		enabled: false,
+	});
+
+	// set available days list
+	const handleGetAvailableList = async (signal: AbortSignal) => {
+		let start = format(startOfMonth(selectedDay || today), 'yyyy-MM-dd');
+		let end = format(endOfMonth(selectedDay || today), 'yyyy-MM-dd');
+		let newAvailableList = await getAvailableList(signal, code, start, end) || null as AvailableList | null;
+		handleAvailableTimeList(newAvailableList);
+		return newAvailableList;
+	}
+
+	// set available time list
+	const handleAvailableTimeList = (newAvailableList: AvailableList | null) => {
+		if (!selectedDay || !newAvailableList) {
 			set_availableTimeList(null);
 			return;
 		}
-		let key = format(selectedDay, 'yyyy-MM-dd') as keyof AvailableList;
-		set_availableTimeList(availableList[key] || null);
-		console.log(availableList[key])
+		let formatDate = format(selectedDay, 'yyyy-MM-dd') as keyof AvailableList;
+		let newTimeList = newAvailableList.find((obj) => {
+			return obj.date === formatDate
+		})?.availableTimeList;
+		set_availableTimeList(newTimeList || null);
+	}
+
+	// selectedDay change event
+	useEffect(() => {
+		availableListQuery.refetch();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedDay]);
 

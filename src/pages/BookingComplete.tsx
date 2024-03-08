@@ -8,7 +8,6 @@ import check from "../images/check.svg";
 function BookingComplete() {
 	const navigate = useNavigate();
 	const { state } = useLocation();
-	console.log('state', state)
 	const code = state.code || null as string | null;
 	const date = state.date?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? state.date : null;
 	const parseDate = date ? parse(date, 'yyyy-MM-dd', new Date()) : null;

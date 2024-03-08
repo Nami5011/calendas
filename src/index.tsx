@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import Mypage from './pages/Mypage';
 import HeaderGuest from './components/HeaderGuest';
 import BookingComplete from './pages/BookingComplete';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const router = createBrowserRouter([
 	{
@@ -47,9 +48,12 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement
 );
+const queryClient = new QueryClient();
 root.render(
 	// <React.StrictMode>
-	<RouterProvider router={router} />
+	<QueryClientProvider client={queryClient}>
+		<RouterProvider router={router} />
+	</QueryClientProvider>
 	// </React.StrictMode>
 );
 

@@ -2,11 +2,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import '../App.css';
 import { getSession, setSession } from '../utils/session';
 import EventCard from '../components/EventCard';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { parse } from 'date-fns';
 import DateTimeCard from '../components/DateTimeCard';
 import Input from '../components/Input';
 import { FormProvider, useForm } from 'react-hook-form';
+import { type CreateGoogleEvent } from '../types/googleCalendar';
+import { createEvent } from '../models/calendar';
+import { useQuery } from '@tanstack/react-query';
 type FormInput = {
 	name?: string | null;
 	email?: string | null;
@@ -26,7 +29,7 @@ function Confirm() {
 	if (!event) {
 		set_event({
 			code: '123',
-			title: 'Title',
+			title: 'Meeting',
 			description: 'description here',
 			duration: '30 minutes',
 			confirmation_message: "Thanks [name],\nYou'll recieve a confirmation email shortly\nYour email address [email]",
@@ -42,6 +45,8 @@ function Confirm() {
 	}, []);
 
 	const goBack = () => {
+		if (googleEventQuery.isLoading) return;
+
 		let editAddress = `/calendar?code=${code}`;
 		if (date) editAddress += `&date=${date}`;
 
@@ -52,7 +57,35 @@ function Confirm() {
 		navigate(editAddress);
 	}
 
-	const onSubmit = methods.handleSubmit(data => {
+	// Google Create Event
+	const googleEvent = useRef<CreateGoogleEvent | null>(null);
+	const googleEventQuery = useQuery({
+		queryKey: ['availableList'],
+		queryFn: ({ signal }) => googleEvent.current && createEvent(signal, googleEvent.current),
+		// staleTime: 1000 * 60 * 10, //fetch again after 10 minutes
+		enabled: false, // Not to call on first render
+	});
+
+	const onSubmit = methods.handleSubmit(async (data) => {
+		// Create Google Calendar Event
+		googleEvent.current = {
+			event_code: code,
+			summary: event.title,
+			startDateTime: `${date} ${start}`,
+			endDateTime: `${date} ${end}`,
+			timeZone: 'Asia/Tokyo',
+			description: `Meeting with ${data.name}`,
+			location: 'Online',
+			attendeeEmailList: [data.email],
+		} as CreateGoogleEvent;
+		const resultGoogleEventQuery = await googleEventQuery.refetch();
+		// Created Google Calendar Event result
+		const result = await resultGoogleEventQuery.data;
+		if (resultGoogleEventQuery.isError) {
+			console.error(resultGoogleEventQuery.error);
+			return;
+		}
+		console.log('result', result);
 		let state = {
 			code: code,
 			title: event.title,
@@ -108,12 +141,25 @@ function Confirm() {
 								}}
 							/>
 							<div className="mt-4 flex flex-col md:flex-row-reverse md:justify-between font-medium">
-								<button className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center
-							text-white bg-[#7F27FF] hover:bg-[#9F70FD] rounded-lg"
-									onClick={() => onSubmit()}>Confirm Booking</button>
-								<button type="button" className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center 
-								border border-[#9F70FD] hover:bg-[#9F70FD] hover:text-white rounded-lg"
-									onClick={() => goBack()}>Cancel</button>
+								<button
+									className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center
+									text-white bg-[#7F27FF] hover:bg-[#9F70FD] rounded-lg disabled:opacity-75"
+									onClick={() => onSubmit()} disabled={googleEventQuery.isLoading}
+								>
+									{googleEventQuery.isLoading &&
+										<svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+											<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+											<path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+										</svg>
+									}
+									Confirm Booking
+								</button>
+								<button type="button"
+									className="py-3 px-6 w-full md:w-auto my-1.5 cursor-pointer flex justify-center items-center 
+									border border-[#9F70FD] hover:bg-[#9F70FD] hover:text-white rounded-lg disabled:opacity-75"
+									disabled={googleEventQuery.isLoading}
+									onClick={() => goBack()}
+								>Cancel</button>
 							</div>
 						</form>
 					</FormProvider>
