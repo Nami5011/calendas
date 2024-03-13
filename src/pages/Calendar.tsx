@@ -9,7 +9,7 @@ import EventCard from '../components/EventCard';
 import { removeSession, setSession } from '../utils/session';
 import { classNames } from '../utils/cssClassName';
 import { useQuery } from '@tanstack/react-query';
-import { createEvent, getAvailableList } from '../models/calendar';
+import { getAvailableList } from '../models/calendar';
 import { type Event } from '../types/event';
 import { getEvent } from '../models/event';
 
@@ -107,7 +107,7 @@ function Calendar() {
 	return (
 		<div className="grid grid-cols-12 lg:grid-cols-8 gap-4">
 			<div className="col-span-12 md:col-start-2 md:col-span-10 lg:col-start-3 lg:col-span-4">
-				<EventCard parentProps={event} />
+				<EventCard parentProps={event} isLoading={getEventQuery.isFetching} />
 			</div>
 			<div className="col-span-12 md:col-start-2 md:col-span-10 lg:col-start-3 lg:col-span-4">
 				<div className="w-auto flex flex-wrap md:flex-nowrap items-stretch justify-center">

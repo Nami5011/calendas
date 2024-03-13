@@ -116,7 +116,7 @@ function Confirm() {
 	return (
 		<div className="grid grid-cols-12 lg:grid-cols-8 gap-4">
 			<div className="col-span-12 md:col-start-2 md:col-span-10 lg:col-start-3 lg:col-span-4">
-				<EventCard parentProps={event} />
+				<EventCard parentProps={event} isLoading={getEventQuery.isFetching} />
 			</div>
 			<div className="mx-2 col-span-12 md:col-start-2 md:col-span-10 lg:col-start-3 lg:col-span-4">
 				<div className="w-full md:w-auto md:p-8 p-4 dark:bg-gray-600 md:dark:bg-gray-800 bg-gray-50 md:rounded">
