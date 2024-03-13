@@ -30,8 +30,12 @@ function Confirm() {
 	const [event, set_event] = useState<Event | null>(getSession('event') ? getSession('event') : null);
 	const handleGetEventQuery = async (signal: AbortSignal) => {
 		console.log('called get event')
-		let newEvent = await getEvent(signal, code) as Event | null;
-		set_event(newEvent || null);
+		let newEvent = await getEvent(signal, code);
+		if (!newEvent) {
+			navigate('/notFound');
+			return newEvent;
+		}
+		set_event(newEvent);
 		return newEvent;
 	}
 	// get event query

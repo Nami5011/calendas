@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import edit from '../images/edit.svg';
+import { ReactComponent as Edit } from '../images/edit.svg';
 import { classNames } from "../utils/cssClassName";
 
 type Card = {
@@ -20,7 +20,7 @@ function DateTimeCard({ parentProps }: Card) {
 	return (<div className={classNames(parentProps.edit && "cursor-pointer hover:bg-[#9F70FD]",
 		"w-full my-2 p-3 md:px-8 border border-gray-500 dark:border-gray-200 rounded-lg")}
 		onClick={() => handleGoBack()}>
-		{parentProps.edit && <img src={edit} className="svg-black dark:svg-white w-4 h-4 float-right" alt="timer" />}
+		{parentProps.edit && <Edit className="svg-black dark:svg-white w-4 h-4 float-right" />}
 		<p>{parentProps.parseDate && format(parentProps.parseDate, 'EEEE, LLLL do')}</p>
 		<p>{parentProps.start} - {parentProps.end}</p>
 	</div>);

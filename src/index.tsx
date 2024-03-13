@@ -43,6 +43,10 @@ const router = createBrowserRouter([
 		path: '/complete',
 		element: <><HeaderGuest /><BookingComplete /></>,
 	},
+	{
+		path: '/notFound',
+		element: <NotFoundPage />,
+	},
 ]);
 
 const root = ReactDOM.createRoot(

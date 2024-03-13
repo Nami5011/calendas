@@ -9,13 +9,19 @@
 // 	};
 // 	return data;
 // }
-export async function getEvent(signal: AbortSignal | null, code: string) {
-	const fetchdata = await fetch(`http://127.0.0.1:8000/api/v1/event?code=${code}`,
-		{
-			signal: signal,
-		});
-	let result = await fetchdata.json();
-	// let result = fetchData();
-	// console.log(result)
-	return result;
+
+import axios from "axios";
+import { type Event } from '../types/event';
+
+export async function getEvent(signal: AbortSignal, code: string): Promise<Event | null> {
+	try {
+		const { data } = await axios.get(`http://127.0.0.1:8000/api/v1/event?code=${code}`,
+			{
+				signal: signal,
+			});
+		return data as Event;
+	} catch (error) {
+		console.error('error', error)
+		return null;
+	}
 }

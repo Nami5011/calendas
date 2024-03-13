@@ -1,4 +1,4 @@
-import timer from '../images/timer.svg';
+import { ReactComponent as Timer } from '../images/timer.svg';
 import { type Event } from '../types/event';
 
 type Props = {
@@ -17,7 +17,7 @@ function EventCard({ parentProps }: Props) {
 			<h1 className='text-2xl font-semibold'>{parentProps?.title}</h1>
 			<p>{parentProps?.description}</p>
 			<span className="inline-flex">
-				<img src={timer} className="svg-black dark:svg-white mr-1 " alt="timer" />
+				<Timer className="svg-black dark:svg-white mr-1 my-auto" />
 				<span>{parentProps?.duration}</span>
 			</span>
 		</div>

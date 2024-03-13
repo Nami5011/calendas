@@ -28,7 +28,7 @@ function Calendar() {
 	const navigate = useNavigate();
 	const { search } = useLocation();
 	const queryString = new URLSearchParams(search);
-	const code = queryString.get('code') as string | '';
+	const code = queryString.get('code') || '' as string | '';
 	// yyyy-MM-dd
 	const date = queryString.get('date')?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? queryString.get('date') : null;
 	const [selectedDay, set_selectedDay] = useState<Date | null>(date ? parse(date, 'yyyy-MM-dd', new Date()) : null);
@@ -36,9 +36,13 @@ function Calendar() {
 	const [event, set_event] = useState<Event | null>(null);
 
 	const handleGetEventQuery = async (signal: AbortSignal) => {
-		console.log('called get event')
-		let newEvent = await getEvent(signal, code) as Event | null;
-		set_event(newEvent || null);
+		// console.log('called get event', code)
+		let newEvent = await getEvent(signal, code);
+		if (!newEvent) {
+			navigate('/notFound');
+			return newEvent;
+		}
+		set_event(newEvent);
 		return newEvent;
 	}
 	// get event query
@@ -48,7 +52,6 @@ function Calendar() {
 		staleTime: 1000 * 60 * 10, //fetch again after 10 minutes
 		enabled: false,
 	});
-
 
 	// Init
 	useEffect(() => {
