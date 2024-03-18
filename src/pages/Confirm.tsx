@@ -12,6 +12,7 @@ import { createEvent } from '../models/calendar';
 import { useQuery } from '@tanstack/react-query';
 import { getEvent } from '../models/event';
 import { type Event } from '../types/event';
+import { EmailPattern } from '../utils/validations';
 type FormInput = {
 	name?: string | null;
 	email?: string | null;
@@ -152,6 +153,10 @@ function Confirm() {
 										value: true,
 										message: 'required',
 									},
+									pattern: {
+										value: EmailPattern,
+										message: 'Invalid email format',
+									}
 								}}
 							/>
 							<div className="mt-4 flex flex-col md:flex-row-reverse md:justify-between font-medium">

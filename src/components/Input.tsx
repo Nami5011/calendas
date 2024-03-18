@@ -1,13 +1,9 @@
 import { useFormContext } from "react-hook-form";
-import { EmailPattern, findInputError, isFormInvalid } from "../utils/validations";
+import { findInputError, isFormInvalid } from "../utils/validations";
 
-type InputProps = {
+interface InputProps
+	extends React.InputHTMLAttributes<HTMLInputElement> {
 	label: string;
-	name: string
-	type?: 'email' | 'text' | 'tel' | 'url';
-	id?: string;
-	placeholder?: string;
-	maxLength?: number;
 	validation?: {
 		required?: {
 			value: boolean;
@@ -27,26 +23,25 @@ type InputProps = {
 		}
 	}
 }
-
 Input.defaultProps = {
 	type: 'text',
 }
-function Input({ label, name, type, id, placeholder, maxLength, validation }: InputProps) {
+function Input({ label, name, type, id, validation, ...restProps }: InputProps) {
 	const {
 		register,
 		formState: { errors },
 	} = useFormContext();
 
-	if (type === 'email') {
-		// Register email pattern
-		let pattern = {
-			value: EmailPattern,
-			message: 'Invalid email format',
-		};
-		validation = { pattern, ...validation };
-	}
+	// if (type === 'email') {
+	// 	// Register email pattern
+	// 	let pattern = {
+	// 		value: EmailPattern,
+	// 		message: 'Invalid email format',
+	// 	};
+	// 	validation = { pattern, ...validation };
+	// }
 
-	const inputError = findInputError(errors, name);
+	const inputError = findInputError(errors, name || '');
 	const isInvalid = isFormInvalid(inputError);
 	return (
 		<>
@@ -55,10 +50,9 @@ function Input({ label, name, type, id, placeholder, maxLength, validation }: In
 				<input className="p-3 w-full border border-gray-500 text-black font-medium rounded-lg"
 					type={type}
 					id={id}
-					placeholder={placeholder}
-					maxLength={maxLength}
-					{...register(name, validation)}
+					{...register(name || '', validation)}
 					aria-invalid={isInvalid ? "true" : "false"}
+					{...restProps}
 				/>
 				{isInvalid &&
 					<p className="mx-2 text-red-700 dark:text-red-400">{inputError.error.message}</p>

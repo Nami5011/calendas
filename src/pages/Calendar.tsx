@@ -22,7 +22,18 @@ type AvailableList = {
 	date: string; // Date in YYYY-MM-DD format
 	availableTimeList: TimeRange[];
 }[];
-
+const SkeletonLoader: React.FC = () => {
+	return (
+		<div className="animate-pulse flex space-x-4">
+			<div className="flex-1 space-y-6 py-1">
+				<div className="space-y-3">
+					<div className="h-2 py-7 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+					<div className="h-2 py-7 bg-gray-400 dark:bg-gray-500 rounded-full"></div>
+				</div>
+			</div>
+		</div>
+	);
+}
 function Calendar() {
 	const today = startOfToday();
 	const navigate = useNavigate();
@@ -126,20 +137,25 @@ function Calendar() {
 								</div>
 							}
 							<div className={classNames("pb-4 pt-5 px-6 border-gray-400 border-dashed flex flex-col", selectedDay && "border-b")}>
-								{!selectedDay &&
+								{(!availableListQuery.isFetching && !selectedDay) &&
 									<p className="text-center">Select a date</p>
 								}
 								{
-									availableTimeList && availableTimeList.map((time, index) => (
-										<button key={index} onClick={() => handleSelectTime(time)}
+									availableListQuery.isFetching && <SkeletonLoader />
+								}
+								{
+									(!availableListQuery.isFetching && availableTimeList) && availableTimeList.map((time, index) => (
+										<button
+											key={index} onClick={() => handleSelectTime(time)}
+											disabled={getEventQuery.isFetching}
 											className="px-4 py-3 my-2 dark:text-gray-50 font-semibold rounded-full
 										dark:bg-[#7F27FF] border border-[#9F70FD] dark:border-[#7F27FF]
 										hover:text-white hover:bg-[#7F27FF] dark:hover:bg-[#9F70FD] hover:border-transparent 
-										focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2"
+										focus:outline-none focus:ring-2 focus:ring-purple-600 focus:ring-offset-2 disabled:bg-gray-700"
 										>{time.start} - {time.end}</button>
 									))
 								}
-								{(selectedDay && !availableTimeList) &&
+								{(!availableListQuery.isFetching && selectedDay && !availableTimeList) &&
 									<p className="text-center">Try another day</p>
 								}
 							</div>
