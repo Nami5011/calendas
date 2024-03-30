@@ -1,7 +1,7 @@
-import { add, eachDayOfInterval, endOfMonth, endOfWeek, format, isBefore, isEqual, isSameMonth, isToday, parse, startOfMonth, startOfToday, startOfWeek } from "date-fns";
-import { useState } from "react";
+import { add, eachDayOfInterval, endOfMonth, endOfWeek, format, isBefore, isEqual, isSameMonth, isToday, startOfMonth, startOfToday, startOfWeek } from "date-fns";
 import CalendarWeekHeader from "./CalendarWeekHeader";
 import { classNames } from "../utils/cssClassName";
+import { type AvailableFlgList } from "../types/calendar";
 
 CalendarMonth.defaultProps = {
 	parentProps: {
@@ -14,13 +14,18 @@ type CalendarMonthProps = {
 	parentProps: {
 		selectedDay: Date | null;
 		set_selectedDay: React.Dispatch<React.SetStateAction<Date | null>>;
+		selectedMonth: Date;
+		set_selectedMonth: React.Dispatch<React.SetStateAction<Date>>;
 		selectableStartDay: Date;
+		monthlyAvailableFlgList: AvailableFlgList | null;
 	}
 }
+type WeeksChild = {
+	day: Date;
+	checkFlg: boolean;
+}
 function CalendarMonth({ parentProps }: CalendarMonthProps) {
-	const today = startOfToday();
-	const [currentMonth, set_currentMonth] = useState(format(parentProps.selectedDay || today, 'MMM-yyyy'));
-	let firstDayCurrentMonth = parse(currentMonth, 'MMM-yyyy', new Date());
+	let firstDayCurrentMonth = startOfMonth(parentProps.selectedMonth);
 	// List of days
 	let newDays = eachDayOfInterval({
 		start: startOfWeek(firstDayCurrentMonth),
@@ -28,9 +33,13 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 	});
 
 	var weeks = [] as any[];
-	var weeksChild = [] as Date[];
+	var weeksChild = [] as WeeksChild[];
 	newDays.forEach((day, index) => {
-		weeksChild.push(day);
+		let dayString = format(day, 'yyyy-MM-dd');
+		let availableFlg = parentProps.monthlyAvailableFlgList?.find((obj) => {
+			return obj.date === dayString;
+		})?.isAvailable;
+		weeksChild.push({ day: day, checkFlg: availableFlg || false });
 		if ((index + 1) % 7 === 0) {
 			weeks.push(weeksChild);
 			weeksChild = [];
@@ -39,13 +48,13 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 
 	const changeMonth = (moveNumber: number) => {
 		let firstDayNextMonth = add(firstDayCurrentMonth, { months: moveNumber });
-		set_currentMonth(format(firstDayNextMonth, 'MMM-yyyy'));
+		parentProps.set_selectedMonth(firstDayNextMonth);
 	}
 
 	const handleSelectDay = (day: Date) => {
 		if (isBefore(day, parentProps.selectableStartDay)) return;
 		if (!isSameMonth(day, firstDayCurrentMonth)) {
-			set_currentMonth(format(startOfMonth(day), 'MMM-yyyy'));
+			parentProps.set_selectedMonth(startOfMonth(day));
 		}
 		parentProps.set_selectedDay(day);
 	}
@@ -77,7 +86,7 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 						<tbody>
 							{weeks.map((week, weekIndex) => (
 								<tr key={weekIndex.toString()}>
-									{week.map((day: any, dayIndex: number) => (
+									{week.map(({ day, checkFlg }: WeeksChild, dayIndex: number) => (
 										<td key={weekIndex.toString() + dayIndex.toString()}>
 											<button
 												onClick={() => handleSelectDay(day)}
@@ -88,7 +97,7 @@ function CalendarMonth({ parentProps }: CalendarMonthProps) {
 													(!isSameMonth(day, firstDayCurrentMonth) || isBefore(day, parentProps.selectableStartDay)) && "text-gray-300 dark:text-gray-500", // Other month or Before available day
 													!isBefore(day, parentProps.selectableStartDay) && "hover:bg-[#9F70FD] hover:text-gray-100", // Selectable day
 													(dayIndex !== 0 && dayIndex !== 6) && "font-medium", // Weekend
-													false && "ring-1 ring-[#7F27FF]",
+													(isSameMonth(day, firstDayCurrentMonth) && !isBefore(day, parentProps.selectableStartDay) && checkFlg) && "ring-1 ring-[#9F70FD]",
 													"p-1.5 m-0.5 mx-auto cursor-pointer flex justify-center items-center rounded-full"
 												)}
 											>

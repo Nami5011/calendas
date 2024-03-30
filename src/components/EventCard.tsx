@@ -42,7 +42,7 @@ function EventCard({ parentProps, isLoading }: Props) {
 						<p>{parentProps?.description}</p>
 						<span className="inline-flex">
 							<Timer className="svg-black dark:svg-white mr-1 my-auto" />
-							<span>{parentProps?.duration}</span>
+							<span>{parentProps?.duration} minutes</span>
 						</span>
 					</>
 				)

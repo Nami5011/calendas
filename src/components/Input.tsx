@@ -26,20 +26,11 @@ interface InputProps
 Input.defaultProps = {
 	type: 'text',
 }
-function Input({ label, name, type, id, validation, ...restProps }: InputProps) {
+function Input({ label, name, id, validation, ...restProps }: InputProps) {
 	const {
 		register,
 		formState: { errors },
 	} = useFormContext();
-
-	// if (type === 'email') {
-	// 	// Register email pattern
-	// 	let pattern = {
-	// 		value: EmailPattern,
-	// 		message: 'Invalid email format',
-	// 	};
-	// 	validation = { pattern, ...validation };
-	// }
 
 	const inputError = findInputError(errors, name || '');
 	const isInvalid = isFormInvalid(inputError);
@@ -48,7 +39,6 @@ function Input({ label, name, type, id, validation, ...restProps }: InputProps) 
 			<label className="mx-2" htmlFor={id}>{label}<span className="text-red-700">*</span></label>
 			<div className="my-2">
 				<input className="p-3 w-full border border-gray-500 text-black font-medium rounded-lg"
-					type={type}
 					id={id}
 					{...register(name || '', validation)}
 					aria-invalid={isInvalid ? "true" : "false"}
