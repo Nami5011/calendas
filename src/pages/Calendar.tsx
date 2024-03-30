@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../App.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 // import getCalenderList from '../models/calender';
@@ -12,16 +12,8 @@ import { useQuery } from '@tanstack/react-query';
 import { getAvailableList } from '../models/calendar';
 import { type Event } from '../types/event';
 import { getEvent } from '../models/event';
+import { type TimeRange, type AvailableFlgList, type AvailableList } from '../types/calendar';
 
-type TimeRange = {
-	start: string;
-	end: string;
-}
-
-type AvailableList = {
-	date: string; // Date in YYYY-MM-DD format
-	availableTimeList: TimeRange[];
-}[];
 const SkeletonLoader: React.FC = () => {
 	return (
 		<div className="animate-pulse flex space-x-4">
@@ -43,8 +35,11 @@ function Calendar() {
 	// yyyy-MM-dd
 	const date = queryString.get('date')?.match(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/) ? queryString.get('date') : null;
 	const [selectedDay, set_selectedDay] = useState<Date | null>(date ? parse(date, 'yyyy-MM-dd', new Date()) : null);
+	const [monthlyAvailableTimeList, set_monthlyAvailableTimeList] = useState<AvailableList | null>(null);
+	const [monthlyAvailableFlgList, set_monthlyAvailableFlgList] = useState<AvailableFlgList | null>(null);
 	const [availableTimeList, set_availableTimeList] = useState<Array<TimeRange> | null>(null);
 	const [event, set_event] = useState<Event | null>(null);
+	const [selectedMonth, set_selectedMonth] = useState<Date>(selectedDay || today);
 
 	const handleGetEventQuery = async (signal: AbortSignal) => {
 		// console.log('called get event', code)
@@ -68,12 +63,13 @@ function Calendar() {
 	useEffect(() => {
 		removeSession('event');
 		getEventQuery.refetch();
+		availableListQuery.refetch();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// available days list query
 	const availableListQuery = useQuery({
-		queryKey: ['availableList' + startOfMonth(selectedDay || today) + endOfMonth(selectedDay || today)],
+		queryKey: ['availableList' + format(startOfMonth(selectedMonth), 'yyyy-MM-dd') + format(endOfMonth(selectedMonth), 'yyyy-MM-dd')],
 		queryFn: ({ signal }) => handleGetAvailableList(signal),
 		staleTime: 1000 * 60 * 10, //fetch again after 10 minutes
 		enabled: false,
@@ -81,10 +77,14 @@ function Calendar() {
 
 	// set available days list
 	const handleGetAvailableList = async (signal: AbortSignal) => {
-		let start = format(startOfMonth(selectedDay || today), 'yyyy-MM-dd');
-		let end = format(endOfMonth(selectedDay || today), 'yyyy-MM-dd');
+		let start = format(startOfMonth(selectedMonth), 'yyyy-MM-dd');
+		let end = format(endOfMonth(selectedMonth), 'yyyy-MM-dd');
 		let newAvailableList = await getAvailableList(signal, code, start, end) || null as AvailableList | null;
-		handleAvailableTimeList(newAvailableList);
+		set_monthlyAvailableTimeList(newAvailableList);
+		handleSetmonthlyAvailableFlgList(newAvailableList);
+		let prevAvailableList = monthlyAvailableTimeList ? monthlyAvailableTimeList : [];
+		newAvailableList = newAvailableList ? newAvailableList : [];
+		handleAvailableTimeList([...prevAvailableList, ...newAvailableList]);
 		return newAvailableList;
 	}
 
@@ -95,23 +95,44 @@ function Calendar() {
 			return;
 		}
 		let formatDate = format(selectedDay, 'yyyy-MM-dd') as keyof AvailableList;
+		// console.log('formatDate', formatDate)
+		// console.log('newAvailableList', newAvailableList)
 		let newTimeList = newAvailableList.find((obj) => {
 			return obj.date === formatDate
 		})?.availableTimeList;
-		set_availableTimeList(newTimeList || null);
+		set_availableTimeList(newTimeList && newTimeList.length > 0 ? newTimeList : null);
 	}
 
 	// selectedDay change event
 	useEffect(() => {
-		availableListQuery.refetch();
+		handleAvailableTimeList(monthlyAvailableTimeList);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [selectedDay]);
+
+	// selectedMonth change event
+	useEffect(() => {
+		availableListQuery.refetch();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [selectedMonth]);
 
 	// navigate Confirm page
 	const handleSelectTime = (time: TimeRange) => {
 		let date = format(selectedDay || new Date(), 'yyyy-MM-dd');
 		setSession('event', event || {});
 		navigate(`/confirm?code=${code}&date=${date}&start=${time.start}&end=${time.end}`);
+	}
+
+	const handleSetmonthlyAvailableFlgList = (newMonthlyAvailableTimeList: AvailableList | null) => {
+		let flgList = null;
+		if (newMonthlyAvailableTimeList) {
+			flgList = newMonthlyAvailableTimeList.map((obj) => {
+				return {
+					date: obj.date,
+					isAvailable: obj.availableTimeList && obj.availableTimeList.length > 0 ? true : false,
+				}
+			});
+		}
+		set_monthlyAvailableFlgList(flgList);
 	}
 
 	// const userLanguage = navigator.language;
@@ -126,7 +147,10 @@ function Calendar() {
 						parentProps={{
 							selectedDay: selectedDay,
 							set_selectedDay: set_selectedDay,
+							selectedMonth: selectedMonth,
+							set_selectedMonth: set_selectedMonth,
 							selectableStartDay: addDays(today, event?.start_day_length || 0),
+							monthlyAvailableFlgList: monthlyAvailableFlgList,
 						}}
 					/>
 					<div className="w-full lg:min-w-80 py-3 px-4 md:p-8 lg:px-12 dark:bg-gray-700 bg-gray-50 md:rounded-r md:rounded-l-none">

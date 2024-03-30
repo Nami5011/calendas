@@ -15,7 +15,7 @@ import { type Event } from '../types/event';
 
 export async function getEvent(signal: AbortSignal, code: string): Promise<Event | null> {
 	try {
-		const { data } = await axios.get(`http://127.0.0.1:8000/api/v1/event?code=${code}`,
+		const { data } = await axios.get(process.env.REACT_APP_API_URI + `/api/v1/event?code=${code}`,
 			{
 				signal: signal,
 			});

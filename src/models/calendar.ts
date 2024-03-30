@@ -18,72 +18,58 @@ export async function getCalendarList() {
 	}
 }
 
-function fetchData() {
-	const data = [
-		{
-			date: '2024-03-12',
-			availableTimeList: [
-				{
-					start: '11:00',
-					end: '11:30',
-				},
-				{
-					start: '12:00',
-					end: '12:30',
-				},
-			],
-		},
-		{
-			date: '2024-03-13',
-			availableTimeList: [
-				{
-					start: '11:30',
-					end: '12:00',
-				},
-				{
-					start: '13:00',
-					end: '13:30',
-				},
-			],
-		},
-	];
-	return data;
-}
+// function fetchData() {
+// 	const data = [
+// 		{
+// 			date: '2024-03-28',
+// 			availableTimeList: [
+// 				{
+// 					start: '11:00',
+// 					end: '11:30',
+// 				},
+// 				{
+// 					start: '12:00',
+// 					end: '12:30',
+// 				},
+// 			],
+// 		},
+// 		{
+// 			date: '2024-03-29',
+// 			availableTimeList: [
+// 				{
+// 					start: '11:30',
+// 					end: '12:00',
+// 				},
+// 				{
+// 					start: '13:00',
+// 					end: '13:30',
+// 				},
+// 			],
+// 		},
+// 	];
+// 	return data;
+// }
 export async function getAvailableList(signal: AbortSignal | null, code: string, start: string, end: string) {
-	let data = {
-		method: "POST",
-		headers: {
-			"Content-Type": "application/json",
-		},
-		body: JSON.stringify({
-			message: 'success',
-			code: code,
-			start: start,
-			end: end,
-		}),
-		signal: signal,
-	}
-	// const fetchdata = await fetch('http://127.0.0.1:8000/api/v1/',
-	// 	{
-	// 		method: "POST",
-	// 		headers: {
-	// 			"Content-Type": "application/json",
-	// 		},
-	// 		body: JSON.stringify({
-	// 			message: 'success',
-	// 			code: code,
-	// 			start: start,
-	// 			end: end,
-	// 		}),
-	// 		signal: signal,
-	// 	});
-	// let jsondata = await fetchdata.json();
-	let result = fetchData();
-	return result;
+	const fetchdata = await fetch(process.env.REACT_APP_API_URI + '/api/v1/googleCalendarList',
+		{
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				event_code: code,
+				timeMin: start,
+				timeMax: end,
+			}),
+			signal: signal,
+		});
+	const data = await fetchdata.json();
+	// let result = fetchData();
+	return data;
 }
 
 export async function createEvent(signal: AbortSignal, googleEvent: CreateGoogleEvent) {
-	const fetchdata = await fetch('http://127.0.0.1:8000/api/v1/googleCalendar',
+	const fetchdata = await fetch(process.env.REACT_APP_API_URI + '/api/v1/googleCalendar',
 		{
 			method: "POST",
 			headers: {
